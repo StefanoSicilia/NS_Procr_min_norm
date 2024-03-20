@@ -1,0 +1,4 @@
+This is the data from the paper 
+
+ J. Kiskiras and G. Halikias, A note on the complex semi-definite matrix procrustes problem, Numer. Linear Algebra Appl., 14 (2007), pp. 485-502
+
