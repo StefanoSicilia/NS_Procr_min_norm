@@ -67,15 +67,10 @@ if options.nspsd == 1 % NSPSD PROCRUSTES SOLVED; see [BGP21]
     s = r-length(d(d<10^-12));
     W1=U11(:,r-s+1:r);
     Lambda=D11(r-s+1:r,r-s+1:r);
-    % Y construction
     Y=Z*W1;
-    E=Y*W1';
-    G=Y/Lambda*Y';
-    normGsq=norm(G,'fro')^2;
-    p=8*norm(E,'fro')^2/normGsq;
-    q=-8*(E(:)'*Z(:))/normGsq;
-    alpha=Cardano(p,q);
-    Y=alpha*Z*W1;        
+    p=8*norm(Y,'fro')^2/norm(Y/Lambda*Y','fro')^2;
+    alpha=Cardano(p,-p);
+    Y=alpha*Y;        
     N=0.25*Y/Lambda*Y';
     M=W1*Y'-Z';
     Ahat=U1*A11*U1'+U2*Z*U1'+U1*M*U2'+U2*N*U2';
