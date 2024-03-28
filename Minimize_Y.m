@@ -11,8 +11,8 @@ function Y=Minimize_Y(D,W,Z)
     rho=norm(Yold,'fro');
     lambda=norm(inv(D),'fro');
     L=(0.75*rho^2*lambda^2+2);
-    maxit=500000;
-    tol=1e-8;
+    maxit=5000;
+    tol=1e-6;
     j=0;
     err=tol+1;
     while j<maxit && err>=tol
@@ -20,9 +20,9 @@ function Y=Minimize_Y(D,W,Z)
         Ynew=Yold-1/L*G;
         Ynew=min(rho/norm(Ynew,'fro'),1)*Ynew;
         j=j+1;
-        err=norm(Ynew-Yold,'fro');%/norm(Ynew,'fro');
+        err=norm(Ynew-Yold,'fro')/norm(Ynew,'fro');
         Yold=Ynew;
     end
     Y=Ynew;
-    disp(['The number of iterations is ',num2str(j),'.'])
+    %disp(['The number of iterations is ',num2str(j),'.'])
 end

@@ -38,9 +38,14 @@ if options.nspsd == 1 && options.complex == 1
 end
 
 % Compute the SVD of X, to reduce the original problem
-r=rank(X);
 [n,m]=size(X);
 [U,D,V]=svd(X);
+d=diag(D);
+if options.rank==0
+    r=sum(double(d>10^-12));
+else
+    r=sum(double(d>1e-6*d(1)));
+end
 D1=D(1:r,1:r);
 U1=U(:,1:r);
 U2=U(:,r+1:n);

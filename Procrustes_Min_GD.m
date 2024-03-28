@@ -38,9 +38,14 @@ if options.nspsd == 1 && options.complex == 1
 end
 
 % Compute the SVD of X, to reduce the original problem
-r=rank(X);
 [n,m]=size(X);
 [U,D,V]=svd(X);
+d=diag(D);
+if options.rank==0
+    r=sum(double(d>10^-12));
+else
+    r=sum(double(d>1e-6*d(1)));
+end
 D1=D(1:r,1:r);
 U1=U(:,1:r);
 U2=U(:,r+1:n);
@@ -67,7 +72,8 @@ if options.nspsd == 1 % NSPSD PROCRUSTES SOLVED; see [BGP21]
     s = r-length(d(d<10^-12));
     W1=U11(:,r-s+1:r);
     Lambda=D11(r-s+1:r,r-s+1:r);
-    Y=Minimize_Y(Lambda,W1,Z);
+    %Y=Minimize_Y(Lambda,W1,Z);
+    Y=Min_Y(Lambda,W1,Z);
     N=0.25*Y/Lambda*Y';
     M=W1*Y'-Z';
     Ahat=U1*A11*U1'+U2*Z*U1'+U1*M*U2'+U2*N*U2';
