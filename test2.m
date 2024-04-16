@@ -1,14 +1,15 @@
 %% Script to compare all the approaches to solve NSPSDP with minimal norm 
-% Low-rank X
+% Perturbed Low-rank X, no correction
 
     %% INIZIALIZATION
     %Install
     addpath('./NSPSD_PSD_Procrustes_v1')
+    addpath('./NSPSD_PSD_Procrustes_v1\utils')
     
     % Example
-    n=20; 
-    m=20;
-    r=5;  
+    n=50; 
+    m=70;
+    r=20;  
     
     % Parameters for reduced approach
     options.nspsd=1;
@@ -16,6 +17,7 @@
     options.delta=1e-6; 
     options.rank=0;
     ranktol=1e-8;
+    eta=1e-8;
     
     %% OUTPUT STRUCTURES
     nex=4;
@@ -33,8 +35,8 @@
     tic;
     for j=1:nsample
         rng(j)
-        X=randn(n,r)*randn(r,m);
-        B=rand(n,m);
+        X=randn(n,r)*randn(r,m)+eta*randn(n,m);
+        B=randn(n,m);
         A{i,j}=procrustes_anly(X,B,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
@@ -48,11 +50,10 @@
     fprintf('2: FGM... ')
     i=2;
     tic;
-    %options.timemax = 10;
     for j=1:nsample
         rng(j)
-        X=randn(n,r)*randn(r,m);
-        B=rand(n,m);
+        X=randn(n,r)*randn(r,m)+eta*randn(n,m);
+        B=randn(n,m);
         A{i,j}=Procrustes_FGM(B,X,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
@@ -68,8 +69,8 @@
     tic;
     for j=1:nsample
         rng(j)
-        X=randn(n,r)*randn(r,m);
-        B=rand(n,m);
+        X=randn(n,r)*randn(r,m)+eta*randn(n,m);
+        B=randn(n,m);
         A{i,j}=Procrustes_Min_GD(X,B,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
@@ -85,8 +86,8 @@
     tic;
     for j=1:nsample
         rng(j)
-        X=randn(n,r)*randn(r,m);
-        B=rand(n,m);
+        X=randn(n,r)*randn(r,m)+eta*randn(n,m);
+        B=randn(n,m);
         A{i,j}=Procrustes_Cardano(X,B,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
@@ -111,10 +112,12 @@
     StdRanksSym=std(RanksSym,0,2);
     StdRanksSkew=std(RanksSkew,0,2);
     
-    %% TABLE OF MEANS
-    rownames={'ANFGM','FGM','MINGD','CARDANO'};    
+    %% TABLES
     close all
+    rownames={'ANFGM','FGM','MINGD','CARDANO'};    
     columnnames={'Fun','Norm_sol','Time','Rk(sym(A))','Rk(skew(A))'};
+    
+    % Means
     figure   
     Res={[5,1]};
     Res{1}=MeanRelErr;
@@ -126,11 +129,9 @@
     UT1=uitable('Data',T1{:,:},'ColumnName',columnnames,...
     'RowName',T1.Properties.RowNames,'Units', 'Normalized',...
     'Position',[0, 0, 1, 1]);
-    title('MEANs') 
+    title('Means') 
 
-    %% TABLE OF STANDARD DEVIATIONS
-    rownames={'ANFGM','FGM','MINGD','CARDANO'};    
-    columnnames={'Fun','Norm_sol','Time','Rk(sym(A))','Rk(skew(A))'};
+    % Standard Deviations
     figure   
     Res={[5,1]};
     Res{1}=StdRelErr;
@@ -142,21 +143,20 @@
     UT2=uitable('Data',T2{:,:},'ColumnName',columnnames,...
     'RowName',T2.Properties.RowNames,'Units', 'Normalized',...
     'Position',[0, 0, 1, 1]);    
-    title('STDs')     
+    title('Stds')     
     
-    %% TABLE WITH ALL DATA
+    % All data
     MeanRelErr=round(MeanRelErr,4);
     MeanNorms=round(MeanNorms,4);
     MeanCPUtime=round(MeanCPUtime,2);
-    MeanRanksSym=round(MeanRanksSym,4);
-    MeanRanksSkew=round(MeanRanksSkew,4);
+    MeanRanksSym=round(MeanRanksSym,2);
+    MeanRanksSkew=round(MeanRanksSkew,2);
     StdRelErr=round(StdRelErr,4);
     StdNorms=round(StdNorms,4);
     StdCPUtime=round(StdCPUtime,2);
-    StdRanksSym=round(StdRanksSym,4);
-    StdRanksSkew=round(StdRanksSkew,4);
-    rownames={'ANFGM','FGM','MINGD','CARDANO'};    
-    columnnames={'Fun','Norm_sol','Time'};
+    StdRanksSym=round(StdRanksSym,2);
+    StdRanksSkew=round(StdRanksSkew,2);
+    
     figure
     AllRelErr=strcat('$',num2str(MeanRelErr),' \pm ',num2str(StdRelErr),'$');
     Res{1}=cellstr(AllRelErr);
@@ -173,6 +173,7 @@
     'RowName',T3.Properties.RowNames,'Units', 'Normalized',...
     'Position',[0, 0, 1, 1]);    
     title('All')
-    % then use table generator website to produce latex output
+    
+    % Use table generator website to produce latex output
     
     

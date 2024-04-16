@@ -4,11 +4,12 @@
     %% INIZIALIZATION
     %Install
     addpath('./NSPSD_PSD_Procrustes_v1')
+    addpath('./NSPSD_PSD_Procrustes_v1\utils')
     
     % Example
-    n=50; 
-    m=70;
-    r=20;  
+    n=20; 
+    m=20;
+    r=5;  
     
     % Parameters for reduced approach
     options.nspsd=1;
@@ -148,13 +149,13 @@
     MeanRelErr=round(MeanRelErr,4);
     MeanNorms=round(MeanNorms,4);
     MeanCPUtime=round(MeanCPUtime,2);
-    MeanRanksSym=round(MeanRanksSym,4);
-    MeanRanksSkew=round(MeanRanksSkew,4);
+    MeanRanksSym=round(MeanRanksSym,2);
+    MeanRanksSkew=round(MeanRanksSkew,2);
     StdRelErr=round(StdRelErr,4);
     StdNorms=round(StdNorms,4);
     StdCPUtime=round(StdCPUtime,2);
-    StdRanksSym=round(StdRanksSym,4);
-    StdRanksSkew=round(StdRanksSkew,4);
+    StdRanksSym=round(StdRanksSym,2);
+    StdRanksSkew=round(StdRanksSkew,2);
     rownames={'ANFGM','FGM','MINGD','CARDANO'};    
     columnnames={'Fun','Norm_sol','Time','Rk(sym(A))','Rk(skew(A))'};
     figure
