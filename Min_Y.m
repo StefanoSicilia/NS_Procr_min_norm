@@ -5,7 +5,6 @@ function Y=Min_Y(D,W,Z)
 % by using the gradient G=4*Y*D^(-1)*Y'*Y*D^(-1)+Y-Z*W.
 % It implements the line search back-tracking method.
 
-    rng(1)
     Yold=Z*W;
     sqD=sqrtm(inv(D));
     YD=Yold*sqD;
@@ -20,7 +19,7 @@ function Y=Min_Y(D,W,Z)
     Gold=0.25*Yold/D*(Yold'*Yold)/D+2*(Yold-Z*W);
     gamma=norm(Yold,'fro')/norm(Gold,'fro');
     fnew=fold+1;
-    while fnew>=fold
+    while fnew>=fold && abs(fnew-fold)>1e-16
         Ynew=Yold-gamma*Gold;
         YD=Ynew*sqD;
         fnew=norm(Ynew*W'-Z,'fro')^2+1/16*norm(YD'*YD,'fro')^2;
@@ -47,5 +46,5 @@ function Y=Min_Y(D,W,Z)
         Yold=Ynew;
     end
     Y=Ynew;
-    disp(['The number of iterations is ',num2str(j),'.'])
+    %disp(['The number of iterations is ',num2str(j),'.'])
 end
