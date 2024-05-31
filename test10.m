@@ -1,0 +1,150 @@
+%% Script to compare the scale of computational time for JH example
+
+    %% INIZIALIZATION
+    %Install
+    addpath('./NSPSD_PSD_Procrustes_v1')
+    addpath('./NSPSD_PSD_Procrustes_v1\utils')  
+    
+    % Parameters for reduced approach
+    options.nspsd=1;
+    options.timemax=10; 
+    options.delta=1e-6; 
+    options.rank=1;
+    ranktol=1e-8;
+    
+    %% OUTPUT STRUCTURES
+    nex=4;
+    jmax=11;
+    jmaxFGM=8;
+    A={[nex,jmax]};
+    Functional=zeros(nex,jmax);
+    CPUtime=zeros(nex,jmax);
+    Norms=zeros(nex,jmax);
+    RanksSym=zeros(nex,jmax);
+    RanksSkew=zeros(nex,jmax);
+    
+    %% 1: ANFGM
+    fprintf('1: ANFGM... ')
+    i=1;
+    for j=1:jmax
+        n=2^(j+1);
+        m=n;
+        r=n/2;
+        rng(j)
+        J=triu(ones(n));
+        J=J(:,1:r);
+        H=triu(ones(m));
+        H=H(:,1:r);
+        X=J*H';
+        B=toeplitz(1:n,[1;zeros(m-1,1)]);
+        tic;
+        A{i,j}=procrustes_anly(X,B,options); 
+        CPUtime(i,j)=toc;
+        Functional(i,j)=norm(A{i,j}*X-B,'fro');
+        Norms(i,j)=norm(A{i,j},'fro');
+        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
+        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
+    end
+    fprintf('Done!\n')
+    
+    %% 2: FGM
+    fprintf('2: FGM... ')
+    i=2;
+    for j=1:jmaxFGM
+        n=2^(j+1);
+        m=n;
+        r=n/2;
+        rng(j)
+        J=triu(ones(n));
+        J=J(:,1:r);
+        H=triu(ones(m));
+        H=H(:,1:r);
+        X=J*H';
+        B=toeplitz(1:n,[1;zeros(m-1,1)]);
+        tic;
+        A{i,j}=Procrustes_FGM(B,X,options); 
+        CPUtime(i,j)=toc;
+        Functional(i,j)=norm(A{i,j}*X-B,'fro');
+        Norms(i,j)=norm(A{i,j},'fro');
+        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
+        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
+    end
+    fprintf('Done!\n')
+    
+    %% 3: MINGD
+    fprintf('3: MINGD... ')
+    i=3;
+    for j=1:jmax
+        n=2^(j+1);
+        m=n;
+        r=n/2;
+        rng(j)
+        J=triu(ones(n));
+        J=J(:,1:r);
+        H=triu(ones(m));
+        H=H(:,1:r);
+        X=J*H';
+        B=toeplitz(1:n,[1;zeros(m-1,1)]);
+        tic;
+        A{i,j}=Procrustes_Min_GD(X,B,options); 
+        CPUtime(i,j)=toc;
+        Functional(i,j)=norm(A{i,j}*X-B,'fro');
+        Norms(i,j)=norm(A{i,j},'fro');
+        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
+        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
+    end
+    fprintf('Done!\n')
+    
+    %% 4: CARDANO
+    fprintf('4: CARDANO... ')
+    i=4;
+    for j=1:jmax
+        n=2^(j+1);
+        m=n;
+        r=n/2;
+        rng(j)
+        J=triu(ones(n));
+        J=J(:,1:r);
+        H=triu(ones(m));
+        H=H(:,1:r);
+        X=J*H';
+        B=toeplitz(1:n,[1;zeros(m-1,1)]);
+        tic;
+        A{i,j}=Procrustes_Cardano(X,B,options); 
+        CPUtime(i,j)=toc;
+        Functional(i,j)=norm(A{i,j}*X-B,'fro');
+        Norms(i,j)=norm(A{i,j},'fro');
+        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
+        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
+    end
+    fprintf('Done!\n')
+    
+    %% SCALING OF COMPUTATIONAL TIME
+    close all
+    shift=1;
+    vecj=(1+shift):(jmax+shift);
+    vecjFGM=vecj(1:jmaxFGM);
+    l=length(vecjFGM);
+    figure(1)
+    semilogy(vecj,CPUtime(1,:),'b-o','LineWidth',1.5)
+    hold on
+    semilogy(vecjFGM,CPUtime(2,1:l),'r-s','LineWidth',1.5)
+    hold on
+    semilogy(vecj,CPUtime(3,:),'m-^','LineWidth',1.5)
+    hold on
+    semilogy(vecj,CPUtime(4,:),'c-d','LineWidth',1.5)
+    xlabel('$j$','Interpreter','Latex')
+    ylabel('Time (sec.)')
+    legend('ANFGM','FGM','MINGD','CARD','Location','northwest')
+    
+    figure(2)
+    plot(vecj,CPUtime(1,:),'b-o','LineWidth',1.5)
+    hold on
+    plot(vecjFGM,CPUtime(2,1:l),'r-s','LineWidth',1.5)
+    hold on
+    plot(vecj,CPUtime(3,:),'m-^','LineWidth',1.5)
+    hold on
+    plot(vecj,CPUtime(4,:),'c-d','LineWidth',1.5)
+    xlabel('$j$','Interpreter','Latex')
+    ylabel('Time (sec.)')
+    legend('ANFGM','FGM','MINGD','CARD','Location','northwest')

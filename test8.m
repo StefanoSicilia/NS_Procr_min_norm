@@ -1,4 +1,4 @@
-%% Script with the problem of large dimension (JHG with also FGM)
+%% Script with the problem of large dimension (RANDOM) 
 
     %% INIZIALIZATION
     %Install
@@ -6,15 +6,12 @@
     addpath('./NSPSD_PSD_Procrustes_v1\utils')
     
     % Example
-    n=500; 
-    m=10000;
-    r=10;
-    J=triu(ones(n));
-    J=J(:,1:r);
-    H=triu(ones(m));
-    H=H(:,1:r);
-    X=J*H';
-    B=toeplitz(1:n,[1;zeros(m-1,1)]);
+    n=2048; 
+    m=n;
+    r=ceil(n/2);
+    rng(1)
+    X=randn(n,r)*randn(r,m);
+    B=randn(n,m);
     
     % Parameters for reduced approach
     options.nspsd=1;
@@ -24,7 +21,7 @@
     ranktol=1e-8;
     
     %% OUTPUT STRUCTURES
-    nex=4;
+    nex=2;
     nsample=1;
     A={[nex,nsample]};
     Functional=zeros(nex,nsample);
@@ -33,33 +30,9 @@
     RanksSym=zeros(nex,nsample);
     RanksSkew=zeros(nex,nsample);
     
-    %% 1: GILLIS ET AL. METHOD
-    fprintf('1: ANFGM... ')
+    %% 1: FMINGD
+    fprintf('1: FMINGD... ')
     i=1;
-    tic;
-    A{i}=procrustes_anly(X,B,options); 
-    CPUtime(i)=toc;
-    Functional(i)=norm(A{i}*X-B,'fro');
-    Norms(i)=norm(A{i},'fro');
-    RanksSym(i)=rank(symm(A{i}),ranktol);
-    RanksSkew(i)=rank(skew(A{i}),ranktol);
-    fprintf('Done!\n')
-    
-    %% 2: FGM
-    fprintf('2: FGM... ')
-    i=2;
-    tic;
-    A{i}=Procrustes_FGM(B,X,options); 
-    CPUtime(i)=toc;
-    Functional(i)=norm(A{i}*X-B,'fro');
-    Norms(i)=norm(A{i},'fro');
-    RanksSym(i)=rank(symm(A{i}),ranktol);
-    RanksSkew(i)=rank(skew(A{i}),ranktol);
-    fprintf('Done!\n')
-    
-    %% 3: FMINGD
-    fprintf('3: FMINGD... ')
-    i=3;
     tic;
     A{i}=Procrustes_Min_GD(X,B,options); 
     CPUtime(i)=toc;
@@ -69,9 +42,9 @@
     RanksSkew(i)=rank(skew(A{i}),ranktol);
     fprintf('Done!\n')
     
-    %% 4: CARDANO
-    fprintf('4: CARDANO... ')
-    i=4;
+    %% 2: CARDANO
+    fprintf('2: CARDANO... ')
+    i=2;
     tic;
     A{i}=Procrustes_Cardano(X,B,options); 
     CPUtime(i)=toc;
@@ -83,7 +56,7 @@
     
     %% TABLE OF RESULTS
     RelErr=Functional/norm(B,'fro');
-    rownames={'ANFGM','FGM','MINGD','CARDANO'};    
+    rownames={'MINGD','CARDANO'};    
     close all
     columnnames={'Fun','Norm_sol','Time','Rk(sym(A))','Rk(skew(A))'};
     figure   

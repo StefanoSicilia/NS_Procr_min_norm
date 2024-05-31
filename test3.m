@@ -32,11 +32,11 @@
     %% 1: GILLIS ET AL. METHOD
     fprintf('1: ANFGM... ')
     i=1;
-    tic;
     for j=1:nsample
         rng(j)
         X=randn(n,r)*randn(r,m)+eta*randn(n,m);
         B=randn(n,m);
+        tic;
         A{i,j}=procrustes_anly(X,B,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
@@ -49,11 +49,11 @@
     %% 2: FGM
     fprintf('2: FGM... ')
     i=2;
-    tic;
     for j=1:nsample
         rng(j)
         X=randn(n,r)*randn(r,m)+eta*randn(n,m);
         B=randn(n,m);
+        tic;
         A{i,j}=Procrustes_FGM(B,X,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
@@ -66,11 +66,11 @@
     %% 3: FMINGD
     fprintf('3: FMINGD... ')
     i=3;
-    tic;
     for j=1:nsample
         rng(j)
         X=randn(n,r)*randn(r,m)+eta*randn(n,m);
         B=randn(n,m);
+        tic;
         A{i,j}=Procrustes_Min_GD(X,B,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
@@ -83,11 +83,11 @@
     %% 4: CARDANO
     fprintf('4: CARDANO... ')
     i=4;
-    tic;
     for j=1:nsample
         rng(j)
         X=randn(n,r)*randn(r,m)+eta*randn(n,m);
         B=randn(n,m);
+        tic;
         A{i,j}=Procrustes_Cardano(X,B,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;

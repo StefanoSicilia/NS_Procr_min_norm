@@ -1,5 +1,5 @@
 %% Script to compare all the approaches to solve NSPSDP with minimal norm 
-% Perturbed Low-rank X, no correction
+% Perturbed Low-rank X
 
     %% INIZIALIZATION
     %Install
@@ -7,9 +7,9 @@
     addpath('./NSPSD_PSD_Procrustes_v1\utils')
     
     % Example
-    n=50; 
-    m=70;
-    r=20;  
+    n=200; 
+    m=200;
+    r=50;  
     
     % Parameters for reduced approach
     options.nspsd=1;
@@ -20,7 +20,7 @@
     eta=1e-8;
     
     %% OUTPUT STRUCTURES
-    nex=4;
+    nex=2;
     nsample=20;
     A={[nex,nsample]};
     Functional=zeros(nex,nsample);
@@ -29,48 +29,14 @@
     RanksSym=zeros(nex,nsample);
     RanksSkew=zeros(nex,nsample);
     
-    %% 1: GILLIS ET AL. METHOD
-    fprintf('1: ANFGM... ')
+    %% 1: MINGD
+    fprintf('1: MINGD... ')
     i=1;
-    tic;
     for j=1:nsample
         rng(j)
         X=randn(n,r)*randn(r,m)+eta*randn(n,m);
         B=randn(n,m);
-        A{i,j}=procrustes_anly(X,B,options); 
-        CPUtime(i,j)=toc;
-        Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
-        Norms(i,j)=norm(A{i,j},'fro');
-        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
-        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
-    end
-    fprintf('Done!\n')
-    
-    %% 2: FGM
-    fprintf('2: FGM... ')
-    i=2;
-    tic;
-    for j=1:nsample
-        rng(j)
-        X=randn(n,r)*randn(r,m)+eta*randn(n,m);
-        B=randn(n,m);
-        A{i,j}=Procrustes_FGM(B,X,options); 
-        CPUtime(i,j)=toc;
-        Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
-        Norms(i,j)=norm(A{i,j},'fro');
-        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
-        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
-    end
-    fprintf('Done!\n')
-    
-    %% 3: FMINGD
-    fprintf('3: FMINGD... ')
-    i=3;
-    tic;
-    for j=1:nsample
-        rng(j)
-        X=randn(n,r)*randn(r,m)+eta*randn(n,m);
-        B=randn(n,m);
+        tic;
         A{i,j}=Procrustes_Min_GD(X,B,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
@@ -80,15 +46,18 @@
     end
     fprintf('Done!\n')
     
-    %% 4: CARDANO
-    fprintf('4: CARDANO... ')
-    i=4;
-    tic;
+    % Low rank correction option
+    options.rank=1;
+    
+    %% 2: MINGD LR
+    fprintf('2: MINGD LR... ')
+    i=2;
     for j=1:nsample
         rng(j)
         X=randn(n,r)*randn(r,m)+eta*randn(n,m);
         B=randn(n,m);
-        A{i,j}=Procrustes_Cardano(X,B,options); 
+        tic;
+        A{i,j}=Procrustes_Min_GD(X,B,options); 
         CPUtime(i,j)=toc;
         Functional(i,j)=norm(A{i,j}*X-B,'fro')^2;
         Norms(i,j)=norm(A{i,j},'fro');
@@ -114,7 +83,7 @@
     
     %% TABLES
     close all
-    rownames={'ANFGM','FGM','MINGD','CARDANO'};    
+    rownames={'MINGD','MINGD_LR'};    
     columnnames={'Fun','Norm_sol','Time','Rk(sym(A))','Rk(skew(A))'};
     
     % Means

@@ -1,122 +1,177 @@
 %% Script to compare all the approaches to solve NSPSDP with minimal norm 
-% Single matrix
+% Low-rank X with ranks of solutions
 
     %% INIZIALIZATION
     %Install
     addpath('./NSPSD_PSD_Procrustes_v1')
+    addpath('./NSPSD_PSD_Procrustes_v1\utils')
     
     % Example
-    n=9; 
-    m=8;
-    r=4;
-    rng(1)
-    X=randn(n,r)*randn(r,m);
-    B=rand(n,m);    
+    n=50; 
+    m=70;
+    r=20;  
     
     % Parameters for reduced approach
     options.nspsd=1;
     options.timemax=10; 
     options.delta=1e-6; 
+    options.rank=1;
     ranktol=1e-8;
     
     %% OUTPUT STRUCTURES
-    nex=6;
-    A={[nex,1]};
-    Functional=zeros(nex,1);
-    CPUtime=zeros(nex,1);
-    Norms=zeros(nex,1);
-    RanksSym=zeros(nex,1);
-    RanksSkew=zeros(nex,1);
+    nex=4;
+    nsample=20;
+    A={[nex,nsample]};
+    Functional=zeros(nex,nsample);
+    CPUtime=zeros(nex,nsample);
+    Norms=zeros(nex,nsample);
+    RanksSym=zeros(nex,nsample);
+    RanksSkew=zeros(nex,nsample);
     
     %% 1: GILLIS ET AL. METHOD
     fprintf('1: ANFGM... ')
     i=1;
-    tic;
-    A{i}=procrustes_anly(X,B,options); 
-    CPUtime(i)=toc;
-    Functional(i)=norm(A{i}*X-B,'fro')^2;
-    Norms(i)=norm(A{i},'fro');
-    RanksSym(i)=rank(symm(A{i}),ranktol);
-    RanksSkew(i)=rank(skew(A{i}),ranktol);
+    for j=1:nsample
+        rng(j)
+        X=randn(n,r)*randn(r,m);
+        B=randn(n,m);
+        tic;
+        A{i,j}=procrustes_anly(X,B,options); 
+        CPUtime(i,j)=toc;
+        Functional(i,j)=norm(A{i,j}*X-B,'fro');
+        Norms(i,j)=norm(A{i,j},'fro');
+        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
+        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
+    end
     fprintf('Done!\n')
     
-    %% 2: PLR
-    fprintf('2: PLR... ')
+    %% 2: FGM
+    fprintf('2: FGM... ')
     i=2;
-    tic;
-    A{i}=Procrustes_LowRank(X,B,options); 
-    CPUtime(i)=toc;
-    Functional(i)=norm(A{i}*X-B,'fro')^2;
-    Norms(i)=norm(A{i},'fro');
-    RanksSym(i)=rank(symm(A{i}),ranktol);
-    RanksSkew(i)=rank(skew(A{i}),ranktol);
+    for j=1:nsample
+        rng(j)
+        X=randn(n,r)*randn(r,m);
+        B=randn(n,m);
+        tic;
+        A{i,j}=Procrustes_FGM(B,X,options); 
+        CPUtime(i,j)=toc;
+        Functional(i,j)=norm(A{i,j}*X-B,'fro');
+        Norms(i,j)=norm(A{i,j},'fro');
+        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
+        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
+    end
     fprintf('Done!\n')
     
-    %% 3: FGM
-    fprintf('3: FGM... ')
-    i=3;
-    tic;
-    options.timemax = 1;
-    A{i}=Procrustes_FGM(B,X,options); 
-    CPUtime(i)=toc;
-    Functional(i)=norm(A{i}*X-B,'fro')^2;
-    Norms(i)=norm(A{i},'fro');
-    RanksSym(i)=rank(symm(A{i}),ranktol);
-    RanksSkew(i)=rank(skew(A{i}),ranktol);
+    %% 3: FMINGD
+    fprintf('3: FMINGD... ')
+    i=3; 
+    for j=1:nsample
+        rng(j)
+        X=randn(n,r)*randn(r,m);
+        B=randn(n,m);
+        tic;
+        A{i,j}=Procrustes_Min_GD(X,B,options); 
+        CPUtime(i,j)=toc;
+        Functional(i,j)=norm(A{i,j}*X-B,'fro');
+        Norms(i,j)=norm(A{i,j},'fro');
+        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
+        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
+    end
     fprintf('Done!\n')
     
-    %% 4: FMINUNC
-    fprintf('4: FMINUNC... ')
+    %% 4: CARDANO
+    fprintf('4: CARDANO... ')
     i=4;
-    tic;
-    A{i}=Procrustes_Fminunc(X,B,options); 
-    CPUtime(i)=toc;
-    Functional(i)=norm(A{i}*X-B,'fro')^2;
-    Norms(i)=norm(A{i},'fro');
-    RanksSym(i)=rank(symm(A{i}),ranktol);
-    RanksSkew(i)=rank(skew(A{i}),ranktol);
+    for j=1:nsample
+        rng(j)
+        X=randn(n,r)*randn(r,m);
+        B=randn(n,m);
+        tic;
+        A{i,j}=Procrustes_Cardano(X,B,options); 
+        CPUtime(i,j)=toc;
+        Functional(i,j)=norm(A{i,j}*X-B,'fro');
+        Norms(i,j)=norm(A{i,j},'fro');
+        RanksSym(i,j)=rank(symm(A{i,j}),ranktol);
+        RanksSkew(i,j)=rank(skew(A{i,j}),ranktol);
+    end
     fprintf('Done!\n')
     
-    %% 5: FMINGD
-    fprintf('5: FMINGD... ')
-    i=5;
-    tic;
-    A{i}=Procrustes_Min_GD(X,B,options); 
-    CPUtime(i)=toc;
-    Functional(i)=norm(A{i}*X-B,'fro')^2;
-    Norms(i)=norm(A{i},'fro');
-    RanksSym(i)=rank(symm(A{i}),ranktol);
-    RanksSkew(i)=rank(skew(A{i}),ranktol);
-    fprintf('Done!\n')
+    %% MEANS AND STD OF DATA
+    RelErr=Functional/norm(B,'fro');
     
-    %% 6: CARDANO
-    fprintf('6: CARDANO... ')
-    i=6;
-    tic;
-    A{i}=Procrustes_Cardano(X,B,options); 
-    CPUtime(i)=toc;
-    Functional(i)=norm(A{i}*X-B,'fro')^2;
-    Norms(i)=norm(A{i},'fro');
-    RanksSym(i)=rank(symm(A{i}),ranktol);
-    RanksSkew(i)=rank(skew(A{i}),ranktol);
-    fprintf('Done!\n')
+    MeanRelErr=mean(RelErr,2);
+    MeanNorms=mean(Norms,2);
+    MeanCPUtime=mean(CPUtime,2);
+    MeanRanksSym=mean(RanksSym,2);
+    MeanRanksSkew=mean(RanksSkew,2);
     
-    %% TABLE
-    rownames={'ANFGM','PLR','FGM','FMINUNC','MINGD','CARDANO'};    
+    StdRelErr=std(RelErr,0,2);
+    StdNorms=std(Norms,0,2);
+    StdCPUtime=std(CPUtime,0,2);
+    StdRanksSym=std(RanksSym,0,2);
+    StdRanksSkew=std(RanksSkew,0,2);
+    
+    %% TABLE OF MEANS  
     close all
-    columnnames={'Fun_fr','Norm_A_fr','Time_fr','Rk(sym(A))_fr',...
-        'Rk(skew(A))_fr','Soldiff'};
-    figure    
+    rownames={'ANFGM','FGM','MINGD','CARDANO'};
+    columnnames={'Fun','Norm_sol','Time','Rk(sym(A))','Rk(skew(A))'};
+    
+    figure   
     Res={[5,1]};
-    Res{1}=Functional;
-    Res{2}=Norms;
-    Res{3}=CPUtime;
-    Res{4}=RanksSym;
-    Res{5}=RanksSkew;
+    Res{1}=MeanRelErr;
+    Res{2}=MeanNorms;
+    Res{3}=MeanCPUtime;
+    Res{4}=MeanRanksSym;
+    Res{5}=MeanRanksSkew;
     T1=table(Res{1},Res{2},Res{3},Res{4},Res{5},'RowNames',rownames); 
     UT1=uitable('Data',T1{:,:},'ColumnName',columnnames,...
     'RowName',T1.Properties.RowNames,'Units', 'Normalized',...
     'Position',[0, 0, 1, 1]);
-    title('Results')     
+    title('MEANs') 
+
+    %% TABLE OF STANDARD DEVIATIONS
+    figure   
+    Res={[5,1]};
+    Res{1}=StdRelErr;
+    Res{2}=StdNorms;
+    Res{3}=StdCPUtime;
+    Res{4}=StdRanksSym;
+    Res{5}=StdRanksSkew;
+    T2=table(Res{1},Res{2},Res{3},Res{4},Res{5},'RowNames',rownames); 
+    UT2=uitable('Data',T2{:,:},'ColumnName',columnnames,...
+    'RowName',T2.Properties.RowNames,'Units', 'Normalized',...
+    'Position',[0, 0, 1, 1]);    
+    title('STDs')     
+    
+    %% TABLE WITH ALL DATA
+    % with table generator website it is possible to produce latex output
+    MeanRelErr=round(MeanRelErr,4);
+    MeanNorms=round(MeanNorms,4);
+    MeanCPUtime=round(MeanCPUtime,2);
+    MeanRanksSym=round(MeanRanksSym,2);
+    MeanRanksSkew=round(MeanRanksSkew,2);
+    StdRelErr=round(StdRelErr,4);
+    StdNorms=round(StdNorms,4);
+    StdCPUtime=round(StdCPUtime,2);
+    StdRanksSym=round(StdRanksSym,2);
+    StdRanksSkew=round(StdRanksSkew,2);
+
+    figure
+    round(MeanNorms,4);
+    AllRelErr=strcat('$',num2str(MeanRelErr),' \pm ',num2str(StdRelErr),'$');
+    Res{1}=cellstr(AllRelErr);
+    AllNorms=strcat('$',num2str(MeanNorms),' \pm ',num2str(StdNorms),'$');
+    Res{2}=cellstr(AllNorms);
+    AllCPUtime=strcat('$',num2str(MeanCPUtime),' \pm ',num2str(StdCPUtime),'$');
+    Res{3}=cellstr(AllCPUtime);
+    AllRanksSym=strcat('$',num2str(MeanRanksSym),' \pm ',num2str(StdRanksSym),'$');
+    Res{4}=cellstr(AllRanksSym);
+    AllRanksSkew=strcat('$',num2str(MeanRanksSkew),' \pm ',num2str(StdRanksSkew),'$');
+    Res{5}=cellstr(AllRanksSkew);
+    T3=table(Res{1},Res{2},Res{3},Res{4},Res{5},'RowNames',rownames);
+    UT3=uitable('Data',T3{:,:},'ColumnName',columnnames,...
+    'RowName',T3.Properties.RowNames,'Units', 'Normalized',...
+    'Position',[0, 0, 1, 1]);    
+    title('All')
     
     
