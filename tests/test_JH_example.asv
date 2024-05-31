@@ -1,0 +1,100 @@
+%% Comparison of ANFGM, FGM, MINGD and CARD in solving NSPSD
+% Example in Section 5.3: X=J_nJ_m' and B=H.
+
+    %% Definition of the example
+    n=500; 
+    m=10000;
+    r=10;
+    J=triu(ones(n));
+    J=J(:,1:r);
+    H=triu(ones(m));
+    H=H(:,1:r);
+    X=J*H';
+    B=toeplitz(1:n,[1;zeros(m-1,1)]);
+    
+    %% Inizialization
+    % Parameters for reduced approach
+    options.nspsd=1;
+    options.timemax=10; 
+    options.delta=1e-6; 
+    options.rank=1;
+    ranktol=1e-8;
+    
+    %% OUTPUT STRUCTURES
+    nex=4;
+    nsample=1;
+    A={[nex,nsample]};
+    Functional=zeros(nex,nsample);
+    CPUtime=zeros(nex,nsample);
+    Norms=zeros(nex,nsample);
+    RanksSym=zeros(nex,nsample);
+    RanksSkew=zeros(nex,nsample);
+    
+    %% 1: GILLIS ET AL. METHOD
+    fprintf('1: ANFGM... ')
+    i=1;
+    tic;
+    A{i}=procrustes_anly(X,B,options); 
+    CPUtime(i)=toc;
+    Functional(i)=norm(A{i}*X-B,'fro');
+    Norms(i)=norm(A{i},'fro');
+    RanksSym(i)=rank(symm(A{i}),ranktol);
+    RanksSkew(i)=rank(skew(A{i}),ranktol);
+    fprintf('Done!\n')
+    
+    %% 2: FGM
+    fprintf('2: FGM... ')
+    i=2;
+    tic;
+    A{i}=Procrustes_FGM(B,X,options); 
+    CPUtime(i)=toc;
+    Functional(i)=norm(A{i}*X-B,'fro');
+    Norms(i)=norm(A{i},'fro');
+    RanksSym(i)=rank(symm(A{i}),ranktol);
+    RanksSkew(i)=rank(skew(A{i}),ranktol);
+    fprintf('Done!\n')
+    
+    %% 3: FMINGD
+    fprintf('3: FMINGD... ')
+    i=3;
+    tic;
+    A{i}=Procrustes_Min_GD(X,B,options); 
+    CPUtime(i)=toc;
+    Functional(i)=norm(A{i}*X-B,'fro');
+    Norms(i)=norm(A{i},'fro');
+    RanksSym(i)=rank(symm(A{i}),ranktol);
+    RanksSkew(i)=rank(skew(A{i}),ranktol);
+    fprintf('Done!\n')
+    
+    %% 4: CARDANO
+    fprintf('4: CARDANO... ')
+    i=4;
+    tic;
+    A{i}=Procrustes_Cardano(X,B,options); 
+    CPUtime(i)=toc;
+    Functional(i)=norm(A{i}*X-B,'fro');
+    Norms(i)=norm(A{i},'fro');
+    RanksSym(i)=rank(symm(A{i}),ranktol);
+    RanksSkew(i)=rank(skew(A{i}),ranktol);
+    fprintf('Done!\n')
+    
+    %% TABLE OF RESULTS
+    RelErr=Functional/norm(B,'fro');
+    rownames={'ANFGM','FGM','MINGD','CARDANO'};    
+    close all
+    columnnames={'Fun','Norm_sol','Time','Rk(sym(A))','Rk(skew(A))'};
+    figure   
+    Res={[5,1]};
+    Res{1}=RelErr;
+    Res{2}=Norms;
+    Res{3}=CPUtime;
+    Res{4}=RanksSym;
+    Res{5}=RanksSkew;
+    T1=table(Res{1},Res{2},Res{3},Res{4},Res{5},'RowNames',rownames); 
+    UT1=uitable('Data',T1{:,:},'ColumnName',columnnames,...
+    'RowName',T1.Properties.RowNames,'Units', 'Normalized',...
+    'Position',[0, 0, 1, 1]);
+
+    % Use table generator website to produce latex output
+    
+    
