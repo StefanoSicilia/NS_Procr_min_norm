@@ -1,8 +1,8 @@
 This code implements algorithms to solve the NSPSD Procrustes problem from the paper
 (add preprint here) 
 
-Given rectangular matrices X and B, the problem is to find the (non-)symmetric positive semidefinite matrix A that minimizes the Frobenius norm of AX-B. 
-A non-symmetric PSD matric is a matrix A such that A+A^T is PSD. 
+Given rectangular matrices $X$ and $B$, the problem is to find the (non-)symmetric positive semidefinite matrix $A$ that minimizes the Frobenius norm of $AX-B$. 
+A non-symmetric PSD matrix is a matrix $A$ such that $A+A^\top$ is PSD. 
 
 The four approaches considered in the paper are ANFGM, FGM, MINGD and CARD, which are associated to the following four functions: 
 - Procrustes_ANFGM is the method defined in [BGP21] M.K. Baghel, N. Gillis and P. Sharma, On the non-symmetric semidefinite Procrustes problem, 2021. 
