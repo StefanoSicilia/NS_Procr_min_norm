@@ -1,6 +1,6 @@
-Given rectangular matrices $X$ and $B$, the NSPDSP problem requires to find the matrix $A$ that minimizes the Frobenius norm of $AX-B$, under the constraint that the symmetric part of A is positive semi-definite, that is, $A+A^\top\succeq 0$. 
+Given rectangular matrices $X$ and $B$, the non-symmetric positive semidefinite Procrustes (NSPDSP) problem requires to find the matrix $A$ that minimizes the Frobenius norm of $AX-B$, under the constraint that the symmetric part of A is positive semi-definite, that is, $A+A^\top\succeq 0$. 
 
-This code implements algorithms to solve the non-symmetric positive semidefinite Procrustes (NSPDSP) problem from the paper
+This code implements algorithms to solve the NSPDSP problem from the paper 
 
 [SG24] S. Sicilia and N. Gillis, Minimum-norm solutions of the non-symmetric semidefinite Procrustes problem, June 2024. 
 
