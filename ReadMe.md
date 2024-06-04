@@ -2,7 +2,7 @@ Given rectangular matrices $X$ and $B$, the NSPDSP problem requires to find the 
 
 This code implements algorithms to solve the non-symmetric positive semidefinite Procrustes (NSPDSP) problem from the paper
 
-[SG24] Sicilia, S. and Gillis, N., Minimum-norm solutions of the non-symmetric semidefinite Procrustes problem, June 2024. 
+[SG24] S. Sicilia and N. Gillis, Minimum-norm solutions of the non-symmetric semidefinite Procrustes problem, June 2024. 
 
 
 The four approaches considered in the paper are ANFGM, FGM, MINGD and CARD, which are associated to the following four functions: 
