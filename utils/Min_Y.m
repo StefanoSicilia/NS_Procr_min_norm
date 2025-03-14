@@ -1,54 +1,57 @@
-function Y=Min_Y(D,W,Z)
+function Y=Min_Y(Lambda,W,Z)
 %% Min_Y: 
 % Solves, through gradient descent method the optimization problem
-% min_Y 1/16*norm(Y*D^(-1)*Y','fro')^2+norm(Y*W'-Z,'fro')^2,
-% by using the gradient G=1/4*Y*D^(-1)*Y'*Y*D^(-1)+2*(Y-Z*W).
-% It implements the line search back-tracking method of Algorithm 2.
+% min_Y 1/16*norm(Y*Lambda^(-1)*Y','fro')^2+norm(Y*W'-Z,'fro')^2,
+% by using the gradient G=1/4*Y*Lambda^(-1)*Y'*Y*Lambda^(-1)+2*(Y-Z*W).
+% It implements the line search back-tracking method of Algorithm 2, by
+% verifying the Armijo condition.
 
     Yold=Z*W;
-    sqD=sqrtm(inv(D));
-    YD=Yold*sqD;
+    D=diag(diag(ones(size(Lambda,1))./diag(Lambda)));
+    sqinvD=sqrtm(D);
+    YD=Yold*sqinvD;
     normYDY=norm(YD'*YD,'fro');
     p=8*norm(Yold,'fro')^2/normYDY^2;
     alpha=Cardano(p,-p);
     Yold=alpha*Yold;
-    maxit=200;
+    YD=Yold*sqinvD;
+    normYDY=norm(YD'*YD,'fro');
+    maxit=500;
     tol=1e-8;
-    theta1=2;
-    theta2=1.1;
+    theta1=1.5;
+    c=1e-4;
+    jmax=50;
     
-    % First iteration
-    fold=norm(Yold*W'-Z,'fro')^2+1/16*normYDY^2;
-    Gold=0.25*Yold/D*(Yold'*Yold)/D+2*(Yold-Z*W);
-    gamma=(norm(Yold,'fro')/norm(Gold,'fro'))^2;
-    fnew=fold+1;
-    while fnew>=fold && gamma>1e-16
-        Ynew=Yold-gamma*Gold;
-        YD=Ynew*sqD;
-        fnew=norm(Ynew*W'-Z,'fro')^2+1/16*norm(YD'*YD,'fro')^2;
-        gamma=gamma/theta1;
-    end
-    gamma=gamma*theta2;
+    % First values
+    fold=norm(Yold*W'-Z,'fro')^2+(1/16)*normYDY^2;
+    G=0.25*Yold*D*(Yold'*Yold)*D+2*(Yold-Z*W);
+    g=norm(G,'fro');
+    relerr=1;
     
     % Main Iterations
-    j=1;
-    err=tol+1;
-    while j<maxit && err>=tol
-        fnew=fold+1;
-        G=0.25*Yold/D*(Yold'*Yold)/D+2*(Yold-Z*W);
-        k=1;
-        while fnew>=fold && k<maxit
+    i=1;
+    while i<maxit && g>=tol && relerr>=1e-15
+        gamma=1e-1*norm(Yold,'fro')/g;
+        for j=1:jmax 
             Ynew=Yold-gamma*G;
-            YD=Ynew*sqD;
-            fnew=norm(Ynew*W'-Z,'fro')^2+1/16*norm(YD'*YD,'fro')^2;
-            gamma=gamma/theta1;
-            k=k+1;
+            YDnew=Ynew*sqinvD;
+            fnew=norm(Ynew*W'-Z,'fro')^2+(1/16)*norm(YDnew'*YDnew,'fro')^2;
+            if fnew<=fold-c*gamma*g^2
+                break
+            else
+                gamma=gamma/theta1;
+            end
         end
-        gamma=gamma*theta2;
-        j=j+1;
-        err=norm(Ynew-Yold,'fro')/norm(Ynew,'fro');
+        if j==jmax
+            disp('Armijo failed.')
+            i=maxit;
+        end
+        i=i+1;
+        G=0.25*Ynew*D*(Ynew'*Ynew)*D+2*(Ynew-Z*W);
+        g=norm(G,'fro');
+        relerr=abs(fold-fnew)/fold;
         Yold=Ynew;
+        fold=fnew;
     end
-    Y=Ynew;
-    %disp(['The number of iterations is ',num2str(j),'.'])
+    Y=Yold;
 end
