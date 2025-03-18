@@ -1,5 +1,5 @@
 %% Scaling of ANFGM, FGM, MINGD and CARD in solving NSPSD
-% Example in Section 5.4: X=J_nJ_n' and B=H.
+% Example in Section 5.5: X=J_nJ_n' and B=H.
 
     %% Inizialization    
     % Parameters for Fast Gradient method
@@ -13,8 +13,8 @@
     
     % Output structures
     nex=4;
-    jmax=11;
-    jmaxFGM=8;
+    jmax=11; 
+    jmaxFGM=8; 
     A={[nex,jmax]};
     Functional=zeros(nex,jmax);
     CPUtime=zeros(nex,jmax);
@@ -120,30 +120,34 @@
     
     %% SCALING OF COMPUTATIONAL TIME
     close all
+    figure(1)
     shift=1;
     vecj=(1+shift):(jmax+shift);
     vecjFGM=vecj(1:jmaxFGM);
     l=length(vecjFGM);
     figure(1)
-    semilogy(vecj,CPUtime(1,:),'b-o','LineWidth',1.5)
+    semilogy(vecj,CPUtime(1,:),'b--o','LineWidth',1.5)
     hold on
-    semilogy(vecjFGM,CPUtime(2,1:l),'r-s','LineWidth',1.5)
+    semilogy(vecjFGM,CPUtime(2,1:l),'r-.s','LineWidth',1.5)
     hold on
     semilogy(vecj,CPUtime(3,:),'m-^','LineWidth',1.5)
     hold on
-    semilogy(vecj,CPUtime(4,:),'c-d','LineWidth',1.5)
+    semilogy(vecj,CPUtime(4,:),'c:d','LineWidth',1.5)
     xlabel('$j$','Interpreter','Latex')
-    ylabel('Time (sec.)')
+    ylabel('time (s.)','Interpreter','Latex')
     legend('ANFGM','FGM','MINGD','CARD','Location','northwest')
-    
+    fontsize(14,'points')
+    grid on
+
     figure(2)
-    plot(vecj,CPUtime(1,:),'b-o','LineWidth',1.5)
+    plot(vecj,CPUtime(1,:),'b--o','LineWidth',1.5)
     hold on
-    plot(vecjFGM,CPUtime(2,1:l),'r-s','LineWidth',1.5)
+    plot(vecjFGM,CPUtime(2,1:l),'r-.s','LineWidth',1.5)
     hold on
     plot(vecj,CPUtime(3,:),'m-^','LineWidth',1.5)
     hold on
-    plot(vecj,CPUtime(4,:),'c-d','LineWidth',1.5)
+    plot(vecj,CPUtime(4,:),'c:d','LineWidth',1.5)
     xlabel('$j$','Interpreter','Latex')
-    ylabel('Time (sec.)')
+    ylabel('time (s.)','Interpreter','Latex')
     legend('ANFGM','FGM','MINGD','CARD','Location','northwest')
+    fontsize(14,'points')

@@ -1,5 +1,5 @@
 %% Scaling of ANFGM, FGM, MINGD and CARD in solving NSPSD
-% Example in Section 5.4: average of a sample of 10 random X and B.
+% Example in Section 5.5: average of a sample of 10 random X and B.
 
     %% Inizialization 
     % Parameters for Fast Gradient Method
@@ -99,26 +99,29 @@
     vecjFGM=vecj(1:jmaxFGM);
     l=length(vecjFGM);
     figure(1)
-    semilogy(vecj,MeanCPUtime(1,:),'b-o','LineWidth',1.5)
+    semilogy(vecj,MeanCPUtime(1,:),'b--o','LineWidth',1.5)
     hold on
-    semilogy(vecjFGM,MeanCPUtime(2,1:l),'r-s','LineWidth',1.5)
+    semilogy(vecjFGM,MeanCPUtime(2,1:l),'r-.s','LineWidth',1.5)
     hold on
     semilogy(vecj,MeanCPUtime(3,:),'m-^','LineWidth',1.5)
     hold on
-    semilogy(vecj,MeanCPUtime(4,:),'c-d','LineWidth',1.5)
+    semilogy(vecj,MeanCPUtime(4,:),'c:d','LineWidth',1.5)
     xlabel('$j$','Interpreter','Latex')
-    ylabel('Time (sec.)')
+    ylabel('time (s.)','Interpreter','Latex')
     legend('ANFGM','FGM','MINGD','CARD','Location','northwest')
-    
+    fontsize(14,'points')
+    grid on
+
     figure(2)
-    plot(vecj,MeanCPUtime(1,:),'b-o','LineWidth',1.5)
+    plot(vecj,MeanCPUtime(1,:),'b--o','LineWidth',1.5)
     hold on
-    plot(vecjFGM,MeanCPUtime(2,1:l),'r-s','LineWidth',1.5)
+    plot(vecjFGM,MeanCPUtime(2,1:l),'r-.s','LineWidth',1.5)
     hold on
     plot(vecj,MeanCPUtime(3,:),'m-^','LineWidth',1.5)
     hold on
-    plot(vecj,MeanCPUtime(4,:),'c-d','LineWidth',1.5)
+    plot(vecj,MeanCPUtime(4,:),'c:d','LineWidth',1.5)
     xlabel('$j$','Interpreter','Latex')
-    ylabel('Time (sec.)')
+    ylabel('time (s.)','Interpreter','Latex')
     legend('ANFGM','FGM','MINGD','CARD','Location','northwest')
-    
+    fontsize(14,'points')
+
